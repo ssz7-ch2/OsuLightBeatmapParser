@@ -1,30 +1,36 @@
 ﻿using OsuLightBeatmapParser.Objects;
+using System.Linq;
 
 namespace OsuLightBeatmapParser.Helpers
 {
-    public static class BeatmapHelper
+    public static class BeatmapExtensions
     {
-        public static double BeatLengthAt(Beatmap beatmap, int time)
+        public static double BeatLengthAt(this Beatmap beatmap, int time)
         {
-            return UninheritedTimingPointAt(beatmap, time).BeatLength;
+            return beatmap.UninheritedTimingPointAt(time).BeatLength;
         }
 
-        public static double SliderVelocityAt(Beatmap beatmap, int time)
+        public static double SliderVelocityAt(this Beatmap beatmap, int time)
         {
-            return 100d * beatmap.Difficulty.SliderMultiplier * BpmMultiplierAt(beatmap, time);
+            return 100d * beatmap.Difficulty.SliderMultiplier * beatmap.BpmMultiplierAt(time);
         }
 
-        public static double BpmMultiplierAt(Beatmap beatmap, int time)
+        public static double BpmMultiplierAt(this Beatmap beatmap, int time)
         {
             if (beatmap.TimingPoints.Count == 0)
                 return 0;
 
-            var timingPoint = TimingPointAt(beatmap, time);
+            var timingPoint = beatmap.TimingPointAt(time);
 
             return MathHelper.CalculateBpmMultiplierFromBeatLength(timingPoint.BeatLength);
         }
 
-        public static TimingPoint TimingPointAt(Beatmap beatmap, int time)
+        public static int ComboAt(this Beatmap beatmap, int time)
+        {
+            return beatmap.HitObjects.Where(h => h.EndTime < time).Sum(h => MathHelper.CalculateCombo(beatmap, h));
+        }
+
+        public static TimingPoint TimingPointAt(this Beatmap beatmap, int time)
         {
             if (time < beatmap.TimingPoints[0].Time)
                 return beatmap.TimingPoints[0];
@@ -37,7 +43,7 @@ namespace OsuLightBeatmapParser.Helpers
             return null;
         }
 
-        public static TimingPoint UninheritedTimingPointAt(Beatmap beatmap, int time)
+        public static TimingPoint UninheritedTimingPointAt(this Beatmap beatmap, int time)
         {
             TimingPoint firstUninherited = null;
             for (int i = beatmap.TimingPoints.Count - 1; i >= 0; i--)

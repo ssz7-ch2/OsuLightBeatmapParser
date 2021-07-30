@@ -22,5 +22,8 @@ namespace OsuLightBeatmapParser.Sections
         public bool SpecialStyle { get; set; }
         public bool WidescreenStoryboard { get; set; }
         public bool SamplesMatchPlaybackRate { get; set; }
+        public int Length { get; set; }
+        public int MaxCombo { get; set; }
+        public double MainBPM { get; set; }
     }
 }

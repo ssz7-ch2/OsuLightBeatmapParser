@@ -40,6 +40,7 @@ namespace OsuLightBeatmapParser
             }
 
             //FixColours(beatmap);
+            CalculateExtraInfo(beatmap);
 
             return beatmap;
         }
@@ -47,6 +48,17 @@ namespace OsuLightBeatmapParser
         // only parses sections in fileSections, skips others
         public static Beatmap DecodeRead(string path, FileSection[] fileSections)
         {
+            if (fileSections.Contains(FileSection.HitObjects))
+            {
+                var neededSections = new List<FileSection>();
+                if (!fileSections.Contains(FileSection.Difficulty))
+                    neededSections.Add(FileSection.Difficulty);
+                if (!fileSections.Contains(FileSection.TimingPoints))
+                    neededSections.Add(FileSection.TimingPoints);
+
+                fileSections = neededSections.Concat(fileSections).ToArray();
+            }
+
             var beatmap = new Beatmap();
             var currentSection = FileSection.Format;
             var skip = false;
@@ -78,11 +90,12 @@ namespace OsuLightBeatmapParser
             }
 
             //FixColours(beatmap);
+            CalculateExtraInfo(beatmap);
 
             return beatmap;
         }
 
-        public static Beatmap DecodeAll(string path)
+        public static Beatmap Decode(string path)
         {
             var beatmap = new Beatmap();
             var currentSection = FileSection.Format;
@@ -102,8 +115,19 @@ namespace OsuLightBeatmapParser
             }
 
             //FixColours(beatmap);
+            CalculateExtraInfo(beatmap);
 
             return beatmap;
+        }
+
+        private static void CalculateExtraInfo(Beatmap beatmap)
+        {
+            if (beatmap.HitObjects != null && beatmap.HitObjects.Any())
+            {
+                beatmap.General.Length = beatmap.HitObjects.Last().EndTime - beatmap.HitObjects.First().StartTime;
+                beatmap.General.MaxCombo = beatmap.ComboAt(beatmap.HitObjects.Last().EndTime + 1);
+                beatmap.General.MainBPM = MathHelper.CalculateMainBPM(beatmap);
+            }
         }
 
         private static void InitializeUnparsed(Beatmap beatmap, FileSection section)
@@ -121,6 +145,9 @@ namespace OsuLightBeatmapParser
                     break;
                 case FileSection.Difficulty:
                     beatmap.Difficulty.Unparsed = new List<string>();
+                    break;
+                case FileSection.Events:
+                    beatmap.Events.Unparsed = new List<string>();
                     break;
                 case FileSection.TimingPoints:
                     beatmap.TimingPoints.Unparsed = new List<string>();
@@ -140,7 +167,7 @@ namespace OsuLightBeatmapParser
             beatmap.Editor = new EditorSection();
             beatmap.Metadata = new MetadataSection();
             beatmap.Difficulty = new DifficultySection();
-            beatmap.Events = new EventsSection {Breaks = new List<Tuple<int, int>>()};
+            beatmap.Events = new EventsSection {Breaks = new List<Break>()};
             beatmap.TimingPoints = new TimingPointsSection();
             beatmap.Colours = new ColoursSection();
             beatmap.HitObjects = new HitObjectsSection();
@@ -163,8 +190,7 @@ namespace OsuLightBeatmapParser
                     beatmap.Difficulty = new DifficultySection();
                     break;
                 case FileSection.Events:
-                    beatmap.Events = new EventsSection();
-                    beatmap.Events.Breaks = new List<Tuple<int, int>>();
+                    beatmap.Events = new EventsSection {Breaks = new List<Break>()};
                     break;
                 case FileSection.TimingPoints:
                     beatmap.TimingPoints = new TimingPointsSection();
@@ -354,7 +380,7 @@ namespace OsuLightBeatmapParser
                     beatmap.Metadata.Source = value;
                     break;
                 case "Tags":
-                    beatmap.Metadata.Tags = value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    beatmap.Metadata.Tags = value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
                     break;
                 case "BeatmapID":
                     beatmap.Metadata.BeatmapID = Convert.ToInt32(value);
@@ -430,7 +456,7 @@ namespace OsuLightBeatmapParser
                         beatmap.Events.VideoStartTime = Convert.ToInt32(tokens[1]);
                         break;
                     case EventType.Break:
-                        beatmap.Events.Breaks.Add(new Tuple<int, int>(Convert.ToInt32(tokens[1]), Convert.ToInt32(tokens[2])));
+                        beatmap.Events.Breaks.Add(new Break{StartTime = Convert.ToInt32(tokens[1]), EndTime = Convert.ToInt32(tokens[2])});
                         break;
                     default:
                         // beatmap.Events.Unparsed.Add(line);
@@ -636,7 +662,7 @@ namespace OsuLightBeatmapParser
 
             if (hitObject == null) return;
 
-            hitObject.HitSample = hitSample is null ? null : new HitSample
+            hitObject.HitSample = hitSample is null || hitSample.Length < 2 ? null : new HitSample
             {
                 NormalSet = (SampleSet) Convert.ToInt32(hitSample[0]),
                 AdditionSet = (SampleSet) Convert.ToInt32(hitSample[1]),

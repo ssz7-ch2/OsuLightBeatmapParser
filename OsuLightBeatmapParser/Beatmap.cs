@@ -14,10 +14,7 @@ namespace OsuLightBeatmapParser
         public TimingPointsSection TimingPoints { get; set; }
         public ColoursSection Colours { get; set; }
         public HitObjectsSection HitObjects { get; set; }
-
-        public void Save(string path)
-        {
-            File.WriteAllLines(path, BeatmapEncoder.Encode(this));
-        }
+        public string FileName => string.Join("", $"{Metadata.Artist} - {Metadata.Title} ({Metadata.Creator}) [{Metadata.Version}].osu".Split(Path.GetInvalidFileNameChars()));
+        public void Save(string folderPath) => File.WriteAllLines(Path.Combine(folderPath, FileName), BeatmapEncoder.Encode(this));
     }
 }

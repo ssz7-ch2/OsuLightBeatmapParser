@@ -12,7 +12,7 @@ namespace OsuLightBeatmapParser.Sections
         public string Creator { get; set; }
         public string Version { get; set; }
         public string Source { get; set; } = "";
-        public List<string> Tags { get; set; } = new List<string>();
+        public HashSet<string> Tags { get; set; } = new();
         public int BeatmapID { get; set; }
         public int BeatmapSetID { get; set; } = -1;
     }

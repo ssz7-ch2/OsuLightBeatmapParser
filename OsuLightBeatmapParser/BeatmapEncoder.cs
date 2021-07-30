@@ -32,9 +32,14 @@ namespace OsuLightBeatmapParser
         {
             if (section.Unparsed != null)
             {
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[General]");
-                return section.Unparsed;
+                var listUnparsed = new List<string>
+                {
+                    string.Empty,
+                    "[General]"
+                };
+
+                listUnparsed.AddRange(section.Unparsed);
+                return listUnparsed;
             }
 
             var list = new List<string>
@@ -73,18 +78,17 @@ namespace OsuLightBeatmapParser
 
         public static List<string> EditorSection(EditorSection section)
         {
-            if (section.Unparsed != null)
-            {
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[Editor]");
-                return section.Unparsed;
-            }
-
             var list = new List<string>
             {
                 string.Empty,
                 "[Editor]"
             };
+
+            if (section.Unparsed != null)
+            {
+                list.AddRange(section.Unparsed);
+                return list;
+            }
 
             if (section.Bookmarks != null)
                 list.Add("Bookmarks: " + string.Join(',', section.Bookmarks));
@@ -104,9 +108,14 @@ namespace OsuLightBeatmapParser
         {
             if (section.Unparsed != null)
             {
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[Metadata]");
-                return section.Unparsed;
+                var list = new List<string>
+                {
+                    string.Empty,
+                    "[Metadata]"
+                };
+
+                list.AddRange(section.Unparsed);
+                return list;
             }
 
             return new List<string>
@@ -130,9 +139,14 @@ namespace OsuLightBeatmapParser
         {
             if (section.Unparsed != null)
             {
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[Difficulty]");
-                return section.Unparsed;
+                var list = new List<string>
+                {
+                    string.Empty,
+                    "[Difficulty]"
+                };
+
+                list.AddRange(section.Unparsed);
+                return list;
             }
 
             return new List<string>
@@ -156,6 +170,12 @@ namespace OsuLightBeatmapParser
                 "[Events]"
             };
 
+            if (section.Unparsed != null)
+            {
+                list.AddRange(section.Unparsed);
+                return list;
+            }
+
             if (section.BackgroundImage != null)
                 list.Add($"0,0,\"{section.BackgroundImage}\",0,0");
 
@@ -163,33 +183,29 @@ namespace OsuLightBeatmapParser
                 list.Add($"Video,{section.VideoStartTime},\"{section.Video}\"");
 
             if (section.Breaks.Any())
-                list.AddRange(section.Breaks.ConvertAll(b => $"2,{b.Item1},{b.Item2}"));
-
-            if (section.Unparsed.Count > 0)
-                list.AddRange(section.Unparsed);
+                list.AddRange(section.Breaks.ConvertAll(b => $"2,{b.StartTime},{b.EndTime}"));
 
             return list;
         }
 
         public static List<string> TimingPointsSection(TimingPointsSection section)
         {
-            if (section.Unparsed != null)
-            {
-                if (section.Unparsed.Count == 0)
-                    return new List<string>();
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[TimingPoints]");
-                return section.Unparsed;
-            }
-
-            if (section.Count == 0)
-                return new List<string>();
-
             var list = new List<string>
             {
                 string.Empty,
                 "[TimingPoints]"
             };
+
+            if (section.Unparsed != null)
+            {
+                if (section.Unparsed.Count == 0)
+                    return new List<string>();
+                list.AddRange(section.Unparsed);
+                return list;
+            }
+
+            if (section.Count == 0)
+                return new List<string>();
 
             list.AddRange(section.ConvertAll(WriteHelper.TimingPoint));
 
@@ -198,23 +214,23 @@ namespace OsuLightBeatmapParser
 
         public static List<string> ColoursSection(ColoursSection section)
         {
-            if (section.Unparsed != null)
-            {
-                if (section.Unparsed.Count == 0)
-                    return new List<string>();
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[Colours]");
-                return section.Unparsed;
-            }
-
-            if (section.ComboColours.Count == 0 && section.SliderTrackOverride is null && section.SliderBorder is null)
-                return new List<string>();
-
             var list = new List<string>
             {
                 string.Empty,
                 "[Colours]"
             };
+
+            if (section.Unparsed != null)
+            {
+                if (section.Unparsed.Count == 0)
+                    return new List<string>();
+
+                list.AddRange(section.Unparsed);
+                return list;
+            }
+
+            if (section.ComboColours.Count == 0 && section.SliderTrackOverride is null && section.SliderBorder is null)
+                return new List<string>();
 
             if (section.ComboColours.Count != 0)
                 for (int i = 0; i < section.ComboColours.Count; i++)
@@ -231,18 +247,18 @@ namespace OsuLightBeatmapParser
 
         public static List<string> HitObjectsSection(HitObjectsSection section)
         {
-            if (section.Unparsed != null)
-            {
-                section.Unparsed.Insert(0, string.Empty);
-                section.Unparsed.Insert(1, "[HitObjects]");
-                return section.Unparsed;
-            }
-
             var list = new List<string>
             {
                 string.Empty,
                 "[HitObjects]"
             };
+
+            if (section.Unparsed != null)
+            {
+                list.AddRange(section.Unparsed);
+                return list;
+            }
+
 
             list.AddRange(section.ConvertAll(WriteHelper.HitObject));
             return list;
