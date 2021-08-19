@@ -22,13 +22,17 @@ namespace OsuLightBeatmapParser.Helpers
 
         public static double CalculateBpmMultiplierFromSliderLength(Beatmap beatmap, double sliderLength, int startTime, int duration, int combo)
         {
-            return sliderLength * beatmap.BeatLengthAt(startTime) * (combo - 1) /
+            return sliderLength * beatmap.BeatLengthAt(startTime) ?? 1000 * (combo - 1) /
                    (duration * 100d * beatmap.Difficulty.SliderMultiplier);
         }
 
         public static int CalculateSliderDuration(Beatmap beatmap, int startTime, int slides, double length)
         {
-            return (int)(length / beatmap.SliderVelocityAt(startTime) * slides * beatmap.BeatLengthAt(startTime));
+            var beatLength = beatmap.BeatLengthAt(startTime);
+            if (beatLength is null)
+                return (int)(length / 100d * beatmap.Difficulty.SliderMultiplier * slides * 1000);
+            else
+                return (int)(length / beatmap.SliderVelocityAt(startTime) * slides * beatLength);
         }
 
         public static int CalculateEndTime(Beatmap beatmap, int startTime, int slides, double length)
@@ -43,7 +47,7 @@ namespace OsuLightBeatmapParser.Helpers
             double bpmMultiplier = beatmap.BpmMultiplierAt(slider.StartTime);
             double tickDistance = (beatmap.Version < 8) ? scoringPointDistance : scoringPointDistance * bpmMultiplier;
 
-            double velocity = scoringPointDistance * beatmap.Difficulty.SliderTickRate * bpmMultiplier * (1000F / beatmap.BeatLengthAt(slider.StartTime));
+            double velocity = scoringPointDistance * beatmap.Difficulty.SliderTickRate * bpmMultiplier * (1000F / beatmap.BeatLengthAt(slider.StartTime) ?? 1000);
             int ticks = Math.Max((int)Math.Floor((slider.Length - velocity * 0.01) / tickDistance), 0);
 
             combo += (ticks * slider.Slides) + slider.Slides;
@@ -63,6 +67,8 @@ namespace OsuLightBeatmapParser.Helpers
             // beatLength, duration of that beatLength
             var beatLengthsDuration = new Dictionary<double, int>();
             var uninheritedTimingPoints = beatmap.TimingPoints.Where(t => t.Uninherited).ToList();
+            if (!uninheritedTimingPoints.Any())
+                return 0;
             for (int i = 0; i < uninheritedTimingPoints.Count - 1; i++)
             {
                 var beatLength = uninheritedTimingPoints[i].BeatLength;

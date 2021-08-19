@@ -5,9 +5,9 @@ namespace OsuLightBeatmapParser.Helpers
 {
     public static class BeatmapExtensions
     {
-        public static double BeatLengthAt(this Beatmap beatmap, int time)
+        public static double? BeatLengthAt(this Beatmap beatmap, int time)
         {
-            return beatmap.UninheritedTimingPointAt(time).BeatLength;
+            return beatmap.UninheritedTimingPointAt(time)?.BeatLength;
         }
 
         public static double SliderVelocityAt(this Beatmap beatmap, int time)
