@@ -26,7 +26,9 @@ namespace OsuLightBeatmapParser
                 {
                     var section = ParseHelper.GetCurrentSection(line);
                     if (section != FileSection.None)
-                    { 
+                    {
+                        if (currentSection == FileSection.TimingPoints)
+                            FixTimingPoints(beatmap);
                         currentSection = section;
                         parse = fileSections.Contains(currentSection);
                         if (!parse)
@@ -74,6 +76,8 @@ namespace OsuLightBeatmapParser
                     {
                         if (sectionsToRead == 0)
                             break;
+                        if (currentSection == FileSection.TimingPoints)
+                            FixTimingPoints(beatmap);
                         currentSection = section;
                         skip = !fileSections.Contains(currentSection);
                         if (!skip)
@@ -108,7 +112,9 @@ namespace OsuLightBeatmapParser
                 {
                     var section = ParseHelper.GetCurrentSection(line);
                     if (section != FileSection.None)
-                    { 
+                    {
+                        if (currentSection == FileSection.TimingPoints)
+                            FixTimingPoints(beatmap);
                         currentSection = section;
                     }
                     else
@@ -120,6 +126,28 @@ namespace OsuLightBeatmapParser
             CalculateExtraInfo(beatmap);
 
             return beatmap;
+        }
+
+        private static void FixTimingPoints(Beatmap beatmap)
+        {
+            // attempt to fix map as best as possible as it is impossible to replicate game exactly
+            if (!beatmap.TimingPoints.Where(t => t.Uninherited).Any())
+            {
+                foreach (var timingPoint in beatmap.TimingPoints)
+                    timingPoint.BeatLength = -100;
+
+                beatmap.TimingPoints.Insert(0, new TimingPoint()
+                {
+                    Time = 0,
+                    BeatLength = 1000,
+                    Meter = 4,
+                    SampleSet = SampleSet.Normal,
+                    SampleIndex = 0,
+                    Volume = 100,
+                    Uninherited = true,
+                    Effects = Effects.None
+                });
+            }
         }
 
         private static void CalculateExtraInfo(Beatmap beatmap)
