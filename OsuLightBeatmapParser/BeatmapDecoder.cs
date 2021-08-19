@@ -122,7 +122,22 @@ namespace OsuLightBeatmapParser
 
         private static void CalculateExtraInfo(Beatmap beatmap)
         {
-            if (beatmap.HitObjects != null && beatmap.HitObjects.Any())
+            if (beatmap.TimingPoints != null && !beatmap.TimingPoints.Where(t => t.Uninherited).Any())
+            {
+                beatmap.TimingPoints.Add(new TimingPoint()
+                {
+                    Time = 0,
+                    BeatLength = 800,
+                    Meter = 4,
+                    SampleSet = SampleSet.Normal,
+                    SampleIndex = 0,
+                    Volume = 100,
+                    Uninherited = true,
+                    Effects = Effects.None
+                });
+            }
+
+            if (beatmap.HitObjects != null && beatmap.HitObjects.Any() && beatmap.Difficulty != null && beatmap.TimingPoints != null)
             {
                 beatmap.General.Length = beatmap.HitObjects.Last().EndTime - beatmap.HitObjects.First().StartTime;
                 beatmap.General.MaxCombo = beatmap.ComboAt(beatmap.HitObjects.Last().EndTime + 1);
