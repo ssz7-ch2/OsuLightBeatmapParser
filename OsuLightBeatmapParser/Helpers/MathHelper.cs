@@ -22,7 +22,7 @@ namespace OsuLightBeatmapParser.Helpers
 
         public static double CalculateBpmMultiplierFromSliderLength(Beatmap beatmap, double sliderLength, int startTime, int duration, int combo)
         {
-            return sliderLength * beatmap.BeatLengthAt(startTime) ?? 1000 * (combo - 1) /
+            return sliderLength * (beatmap.BeatLengthAt(startTime) ?? 1000) * (combo - 1) /
                    (duration * 100d * beatmap.Difficulty.SliderMultiplier);
         }
 
