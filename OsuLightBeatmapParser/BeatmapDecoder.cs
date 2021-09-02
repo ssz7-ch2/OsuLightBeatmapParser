@@ -335,6 +335,12 @@ namespace OsuLightBeatmapParser
                     beatmap.Editor ??= new EditorSection();
                     beatmap.Editor.Bookmarks = value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(b => Convert.ToInt32(b)).ToArray();
                     break;
+                case "StartTime":
+                    beatmap.General.StartTime = Convert.ToInt32(value);
+                    break;
+                case "Script":
+                    beatmap.General.Script = value;
+                    break;
             }
         }
 

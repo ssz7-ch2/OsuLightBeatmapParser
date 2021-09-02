@@ -73,6 +73,12 @@ namespace OsuLightBeatmapParser
             if (section.SamplesMatchPlaybackRate)
                 list.Add("SamplesMatchPlaybackRate: " + Convert.ToInt32(section.SamplesMatchPlaybackRate));
 
+            if (section.StartTime != null)
+                list.Add("StartTime: " + section.StartTime);
+
+            if (!string.IsNullOrEmpty(section.Script))
+                list.Add("Script: " + section.Script);
+
             return list;
         }
 
