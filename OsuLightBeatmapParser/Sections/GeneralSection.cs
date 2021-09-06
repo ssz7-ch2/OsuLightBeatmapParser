@@ -25,6 +25,8 @@ namespace OsuLightBeatmapParser.Sections
         public int Length { get; set; }
         public int MaxCombo { get; set; }
         public double MainBPM { get; set; }
+        public int? Index { get; set; }
+        public int? Total { get; set; }
         public int? StartTime { get; set; }
         public string Script { get; set; }
     }

@@ -68,14 +68,16 @@ namespace OsuLightBeatmapParser
                 list.Add("CountdownOffset: " + section.CountdownOffset);
             if (section.Mode == Ruleset.Mania)
                 list.Add("SpecialStyle: " + Convert.ToInt32(section.SpecialStyle));
-
             list.Add("WidescreenStoryboard: " + Convert.ToInt32(section.WidescreenStoryboard));
             if (section.SamplesMatchPlaybackRate)
                 list.Add("SamplesMatchPlaybackRate: " + Convert.ToInt32(section.SamplesMatchPlaybackRate));
 
+            if (section.Index != null)
+                list.Add("Index: " + section.Index);
+            if (section.Total != null)
+                list.Add("Total: " + section.Total);
             if (section.StartTime != null)
                 list.Add("StartTime: " + section.StartTime);
-
             if (!string.IsNullOrEmpty(section.Script))
                 list.Add("Script: " + section.Script);
 

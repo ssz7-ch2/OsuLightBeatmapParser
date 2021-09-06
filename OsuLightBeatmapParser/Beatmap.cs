@@ -16,5 +16,6 @@ namespace OsuLightBeatmapParser
         public HitObjectsSection HitObjects { get; set; }
         public string FileName => string.Join("", $"{Metadata.Artist} - {Metadata.Title} ({Metadata.Creator}) [{Metadata.Version}].osu".Split(Path.GetInvalidFileNameChars()));
         public void Save(string folderPath) => File.WriteAllLines(Path.Combine(folderPath, FileName), BeatmapEncoder.Encode(this));
+        public void SaveToPath(string path) => File.WriteAllLines(path, BeatmapEncoder.Encode(this));
     }
 }
